@@ -32,6 +32,16 @@ window.addEventListener('load', () => {
                 y: particle.y,
             });
         }
+
+        // if trigger is pressed, move player to the center
+        if (controller.trigger) {
+            particle.x = 0;
+            particle.y = 0;
+            client.send({
+                x: particle.x,
+                y: particle.y,
+            });
+        }
     });
 
 });
