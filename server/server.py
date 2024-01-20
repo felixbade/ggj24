@@ -6,11 +6,12 @@ from websockets import WebSocketServerProtocol
 
 # Load the WebSocket port number from .env file or environment variable
 load_dotenv()
-WS_PORT = os.getenv('WS_PORT', 6789)  # Assuming 6789 as default port if not defined
+WS_PORT = os.getenv('WS_PORT', 8000)
 
 # This dictionary will store the connected clients along with their counter-ids
 connected_clients = {}
 counter = 0
+
 
 async def handler(websocket: WebSocketServerProtocol):
     global counter
@@ -31,11 +32,13 @@ async def handler(websocket: WebSocketServerProtocol):
         connected_clients.pop(counter_id)
         print(f"Client #{counter_id} disconnected")
 
+
 async def broadcast(message, sender_websocket):
     # Send the message to all connected clients except the sender
     for counter_id, client in connected_clients.items():
         if client != sender_websocket:
             await client.send(message)
+
 
 async def main():
     # Start the WebSocket server
