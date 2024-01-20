@@ -15,10 +15,10 @@ window.addEventListener('load', () => {
     canvasContainer.appendChild(app.view);
 
     const wrappingContainer = new PIXI.Container();
-    const fxaa = new PIXI.FXAAFilter;
-    wrappingContainer.filters = [fxaa];
     app.stage.addChild(wrappingContainer);
 
+    // PIXI's autoResize does not handle the automatic transform for wrappingContainer
+    // and using the both is a bit buggy
     const resize = () => {
         const scale = window.devicePixelRatio || 1;
         app.renderer.resize(window.innerWidth * scale, window.innerHeight * scale);
