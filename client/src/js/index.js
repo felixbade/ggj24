@@ -8,6 +8,24 @@ window.addEventListener('load', () => {
     const gameContainer = new PIXI.Container();
     container.addChild(gameContainer);
 
+    const bgTexture = PIXI.Texture.from('assets/images/starfield-tile.png');
+    const bgContainer = new PIXI.Container();
+    gameContainer.addChild(bgContainer);
+
+    const bgSprites = [];
+    const bgScale = 0.5;
+    for (let x = -5; x <= 5; x++) {
+        for (let y = -5; y <= 5; y++) {
+            const bgSprite = new PIXI.Sprite(bgTexture);
+            bgSprite.anchor.set(0.5);
+            bgSprite.scale.set(bgScale);
+            bgSprite.x = x * 1000 * bgScale;
+            bgSprite.y = y * 1000 * bgScale;
+            bgContainer.addChild(bgSprite);
+            bgSprites.push(bgSprite);
+        }
+    }
+
     const ship = PIXI.Sprite.from('assets/images/ship-1.png');
     ship.anchor.set(0.5, 0.65);
     ship.scale.set(0.05);
