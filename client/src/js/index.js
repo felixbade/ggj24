@@ -9,7 +9,7 @@ window.addEventListener('load', () => {
     container.addChild(gameContainer);
 
     const particle = PIXI.Sprite.from('assets/images/ship-1.png');
-    particle.anchor.set(0.5);
+    particle.anchor.set(0.5, 0.65);
     particle.scale.set(0.05);
     particle.vx = 0;
     particle.vy = 0;
