@@ -8,9 +8,9 @@ window.addEventListener('load', () => {
     const gameContainer = new PIXI.Container();
     container.addChild(gameContainer);
 
-    const particle = PIXI.Sprite.from('assets/images/gas-particle.svg');
+    const particle = PIXI.Sprite.from('assets/images/ship-1.png');
     particle.anchor.set(0.5);
-    particle.scale.set(0.5); // 2x dpi
+    particle.scale.set(0.05);
     gameContainer.addChild(particle);
 
     client.addEventListener('message', (event) => {
