@@ -8,55 +8,55 @@ window.addEventListener('load', () => {
     const gameContainer = new PIXI.Container();
     container.addChild(gameContainer);
 
-    const particle = PIXI.Sprite.from('assets/images/ship-1.png');
-    particle.anchor.set(0.5, 0.65);
-    particle.scale.set(0.05);
-    particle.vx = 0;
-    particle.vy = 0;
-    gameContainer.addChild(particle);
+    const ship = PIXI.Sprite.from('assets/images/ship-1.png');
+    ship.anchor.set(0.5, 0.65);
+    ship.scale.set(0.05);
+    ship.vx = 0;
+    ship.vy = 0;
+    gameContainer.addChild(ship);
 
     client.addEventListener('message', (event) => {
         const data = event.detail;
-        particle.x = data.x;
-        particle.y = data.y;
-        particle.vx = data.vx;
-        particle.vy = data.vy;
+        ship.x = data.x;
+        ship.y = data.y;
+        ship.vx = data.vx;
+        ship.vy = data.vy;
     });
 
     app.ticker.add(delta => {
         const speed = 0.2;
-        particle.vx += controller.move.x * delta * speed;
-        particle.vy += controller.move.y * delta * speed;
-        particle.x += particle.vx * delta;
-        particle.y += particle.vy * delta;
+        ship.vx += controller.move.x * delta * speed;
+        ship.vy += controller.move.y * delta * speed;
+        ship.x += ship.vx * delta;
+        ship.y += ship.vy * delta;
 
         // rotate according to acceleration
         if (controller.move.x !== 0 || controller.move.y !== 0) {
-            particle.rotation = Math.PI / 2 + Math.atan2(controller.move.y, controller.move.x);
+            ship.rotation = Math.PI / 2 + Math.atan2(controller.move.y, controller.move.x);
         }
 
         // if controller !== (0,0) then send message
         // so we can get updates from other clients when we are resting
         if (controller.move.x !== 0 || controller.move.y !== 0) {
             client.send({
-                x: particle.x,
-                y: particle.y,
-                vx: particle.vx,
-                vy: particle.vy,
+                x: ship.x,
+                y: ship.y,
+                vx: ship.vx,
+                vy: ship.vy,
             });
         }
 
         // if trigger is pressed, move player to the center
         if (controller.trigger) {
-            particle.x = 0;
-            particle.y = 0;
-            particle.vx = 0;
-            particle.vy = 0;
+            ship.x = 0;
+            ship.y = 0;
+            ship.vx = 0;
+            ship.vy = 0;
             client.send({
-                x: particle.x,
-                y: particle.y,
-                vx: particle.vx,
-                vy: particle.vy,
+                x: ship.x,
+                y: ship.y,
+                vx: ship.vx,
+                vy: ship.vy,
             });
         }
     });
