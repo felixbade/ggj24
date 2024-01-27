@@ -33,12 +33,13 @@ window.addEventListener('load', () => {
     ship.vy = 0;
     gameContainer.addChild(ship);
 
-    client.addEventListener('message', (event) => {
-        const data = JSON.parse(event.detail.message);
-        ship.x = data.x;
-        ship.y = data.y;
-        ship.vx = data.vx;
-        ship.vy = data.vy;
+    client.addEventListener('state', (event) => {
+        const state = event.detail;
+
+        ship.x = state.x;
+        ship.y = state.y;
+        ship.vx = state.vx;
+        ship.vy = state.vy;
     });
 
     client.addEventListener('welcome', (event) => {
@@ -71,7 +72,7 @@ window.addEventListener('load', () => {
         // if controller !== (0,0) then send message
         // so we can get updates from other clients when we are resting
         if (controller.move.x !== 0 || controller.move.y !== 0) {
-            client.send({
+            client.updateState({
                 x: ship.x,
                 y: ship.y,
                 vx: ship.vx,

@@ -1,6 +1,7 @@
 import os
 import asyncio
 import json
+import random
 import websockets
 from dotenv import load_dotenv
 from websockets import WebSocketServerProtocol
@@ -13,6 +14,11 @@ WS_PORT = os.getenv('WS_PORT', 8000)
 connected_clients = {}
 counter = 0
 
+game_state = {}
+game_state_id = None
+unhandled_events = []
+
+
 # Commands
 # 1. welcome: Sent to the client when the client connects
 # 2. join: Sent to all other clients when a new client joins
@@ -21,7 +27,7 @@ counter = 0
 
 
 async def handler(websocket: WebSocketServerProtocol):
-    global counter
+    global counter, game_state_id, game_state
     # Assign a unique counter-id to the client
     counter_id = counter = counter + 1
     connected_clients[counter_id] = websocket
@@ -33,6 +39,13 @@ async def handler(websocket: WebSocketServerProtocol):
         "client_id": counter_id
     }))
 
+    # Send the current game state to the client
+    await websocket.send(json.dumps({
+        "command": "state",
+        "state": game_state,
+        "id": game_state_id
+    }))
+
     # Broadcast a join message to all connected clients, except the one who joined
     await broadcast(json.dumps({
         "command": "join",
@@ -41,13 +54,40 @@ async def handler(websocket: WebSocketServerProtocol):
 
     try:
         async for message in websocket:
-            print(f"Client #{counter_id} says: {message}")
-            # Broadcast the message to all clients except the one who sent it
-            await broadcast(json.dumps({
-                "command": "message",
-                "client_id": counter_id,
-                "message": message
-            }), websocket)
+            data = json.loads(message)
+            command = data.get("command")
+
+            # if command == "event":
+            #     unhandled_events.append(data)
+            #     print(f"Client #{counter_id} sent an event: {data}")
+            #     continue
+
+            if command == "state":
+                based_on_id = data.get("based_on_id")
+                if based_on_id != game_state_id:
+                    print(
+                        f"Client #{counter_id} sent an outdated state (based on {based_on_id}, current is {game_state_id})")
+                    continue
+                # TODO: delta compression
+                game_state = data.get("state")
+                game_state_id = data.get("id")
+                print(f"Client #{counter_id} sent a state: {data}")
+
+                # Send the game state to all clients
+                await broadcast(json.dumps({
+                    "command": "state",
+                    "state": game_state,
+                    "id": game_state_id
+                }), websocket)
+
+            # print(f"Client #{counter_id} says: {message}")
+            # # Broadcast the message to all clients except the one who sent it
+            # await broadcast(json.dumps({
+            #     "command": "message",
+            #     "client_id": counter_id,
+            #     "message": message
+            # }), websocket)
+
     except websockets.ConnectionClosed:
         pass
     finally:
