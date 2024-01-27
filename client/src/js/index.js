@@ -34,11 +34,26 @@ window.addEventListener('load', () => {
     gameContainer.addChild(ship);
 
     client.addEventListener('message', (event) => {
-        const data = event.detail;
+        const data = JSON.parse(event.detail.message);
         ship.x = data.x;
         ship.y = data.y;
         ship.vx = data.vx;
         ship.vy = data.vy;
+    });
+
+    client.addEventListener('welcome', (event) => {
+        const { client_id } = event.detail;
+        alert(`Out ID: ${client_id}`);
+    });
+
+    client.addEventListener('join', (event) => {
+        const { client_id } = event.detail;
+        alert(`Client ${client_id} joined`);
+    });
+
+    client.addEventListener('leave', (event) => {
+        const { client_id } = event.detail;
+        alert(`Client ${client_id} left`);
     });
 
     app.ticker.add(delta => {

@@ -9,7 +9,17 @@ class MultiplayerClient extends EventTarget {
         this.socket = new WebSocket(serverURL);
         this.socket.addEventListener('message', (event) => {
             const data = JSON.parse(event.data);
-            this.dispatchEvent(new CustomEvent('message', { detail: data }));
+
+            const { command } = data;
+            if (command === 'welcome') {
+                this.dispatchEvent(new CustomEvent('welcome', { detail: data }));
+            } else if (command === 'join') {
+                this.dispatchEvent(new CustomEvent('join', { detail: data }));
+            } else if (command === 'leave') {
+                this.dispatchEvent(new CustomEvent('leave', { detail: data }));
+            } else if (command === 'message') {
+                this.dispatchEvent(new CustomEvent('message', { detail: data }));
+            }
         });
     }
 
