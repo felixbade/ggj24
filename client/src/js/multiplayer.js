@@ -11,6 +11,7 @@ class MultiplayerClient extends EventTarget {
         this.state = {};
         this.gameStateId = null;
         this.unhandledEvents = {};
+        this.locallyHandledEvents = {};
         this.clientId = null;
         this.socket = new WebSocket(serverURL);
         this.socket.addEventListener('message', (event) => {
@@ -32,7 +33,17 @@ class MultiplayerClient extends EventTarget {
                 this.state = data.state;
                 for (const handled_event_id of data.handled_event_ids) {
                     delete this.unhandledEvents[handled_event_id];
+                    delete this.locallyHandledEvents[handled_event_id];
                 }
+
+                // State command means someone else updated it.
+                // We need to move all locally handled events to unhandled events.
+                // And delete all locally handled events.
+                for (const id in this.locallyHandledEvents) {
+                    this.unhandledEvents[id] = this.locallyHandledEvents[id];
+                    delete this.locallyHandledEvents[id];
+                }
+
                 this.dispatchEvent(new CustomEvent('state', {
                     detail: {
                         state: data.state,
@@ -43,6 +54,7 @@ class MultiplayerClient extends EventTarget {
             } else if (command === 'handled-events') {
                 for (const handled_event_id of data.handled_event_ids) {
                     delete this.unhandledEvents[handled_event_id];
+                    delete this.locallyHandledEvents[handled_event_id];
                 }
 
             } else if (command === 'event') {
@@ -87,6 +99,13 @@ class MultiplayerClient extends EventTarget {
             id: id,
             event: event,
         });
+    }
+
+    handleEvent(eventId) {
+        // move from unhandledEvents to locallyHandledEvents
+        const event = this.unhandledEvents[eventId];
+        delete this.unhandledEvents[eventId];
+        this.locallyHandledEvents[eventId] = event;
     }
 
     send(data) {

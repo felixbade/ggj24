@@ -74,9 +74,8 @@ async def handler(websocket: WebSocketServerProtocol):
             if command == "state":
                 based_on_id = data.get("based_on_id")
                 if based_on_id != game_state_id:
-                    print(
-                        f"Client #{counter_id} sent an outdated state (based on {based_on_id}, current is {game_state_id})")
                     continue
+
                 # TODO: delta compression
                 game_state = data.get("state")
                 game_state_id = data.get("id")
