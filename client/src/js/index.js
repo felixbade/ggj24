@@ -15,13 +15,16 @@ window.addEventListener('load', () => {
 
     const bgSprites = [];
     const bgScale = 0.5;
+    const bgSize = 1000 * bgScale;
     for (let x = -5; x <= 5; x++) {
         for (let y = -5; y <= 5; y++) {
             const bgSprite = new PIXI.Sprite(bgTexture);
-            bgSprite.anchor.set(0.5);
+            bgSprite.anchor.set(bgScale);
             bgSprite.scale.set(bgScale);
-            bgSprite.x = x * 1000 * bgScale;
-            bgSprite.y = y * 1000 * bgScale;
+            bgSprite.x = x * bgSize;
+            bgSprite.y = y * bgSize;
+            bgSprite.dx = x * bgSize;
+            bgSprite.dy = y * bgSize;
             bgContainer.addChild(bgSprite);
             bgSprites.push(bgSprite);
         }
@@ -132,18 +135,18 @@ window.addEventListener('load', () => {
             spaceship.y += spaceship.vy * delta;
 
             // warp
-            if (spaceship.x < -500) {
-                spaceship.x += 1000;
-            }
-            if (spaceship.x > 500) {
-                spaceship.x -= 1000;
-            }
-            if (spaceship.y < -500) {
-                spaceship.y += 1000;
-            }
-            if (spaceship.y > 500) {
-                spaceship.y -= 1000;
-            }
+            // if (spaceship.x < -500) {
+            //     spaceship.x += 1000;
+            // }
+            // if (spaceship.x > 500) {
+            //     spaceship.x -= 1000;
+            // }
+            // if (spaceship.y < -500) {
+            //     spaceship.y += 1000;
+            // }
+            // if (spaceship.y > 500) {
+            //     spaceship.y -= 1000;
+            // }
         }
 
         // draw state on the screen
@@ -172,6 +175,16 @@ window.addEventListener('load', () => {
             // one of them is a string, the other is a number, thus '==' instead of '==='
             if (client.clientId == rocketId) {
                 cameraFollow(sprite);
+            }
+        }
+
+        const playerShip = state.spaceships[client.clientId];
+
+        // warp background with spaceship
+        if (playerShip) {
+            for (const bgSprite of bgSprites) {
+                bgSprite.x = bgSprite.dx + Math.round(playerShip.x / bgSize) * bgSize;
+                bgSprite.y = bgSprite.dy + Math.round(playerShip.y / bgSize) * bgSize;
             }
         }
 
