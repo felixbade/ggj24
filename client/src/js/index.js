@@ -71,24 +71,41 @@ window.addEventListener('load', () => {
         const now = performance.now();
         const delta = (now - lastSimulateTime) / 1000;
 
-        // handle input -> events
-        if (controller.move.x !== 0 || controller.move.y !== 0) {
-            const acceleration = 720;
-            client.addEvent({
-                type: 'impulse',
-                rocket_id: client.clientId,
-                x: controller.move.x * acceleration * delta,
-                y: controller.move.y * acceleration * delta,
-            });
+        const state = client.state;
+        if (!state.spaceships) {
+            state.spaceships = {};
         }
-        const { x, y } = controller.move;
-        client.addEvent({
-            type: 'set-thruster-level',
-            rocket_id: client.clientId,
-            level: Math.sqrt(x * x + y * y),
-        })
 
-        // handle events
+        // simulate world
+        for (const spaceship of Object.values(state.spaceships)) {
+            spaceship.x += spaceship.vx * delta;
+            spaceship.y += spaceship.vy * delta;
+
+            // warp
+            // if (spaceship.x < -500) {
+            //     spaceship.x += 1000;
+            // }
+            // if (spaceship.x > 500) {
+            //     spaceship.x -= 1000;
+            // }
+            // if (spaceship.y < -500) {
+            //     spaceship.y += 1000;
+            // }
+            // if (spaceship.y > 500) {
+            //     spaceship.y -= 1000;
+            // }
+        }
+
+        client.setState(state);
+        lastSimulateTime = now;
+    }
+
+    simulateStep();
+    setInterval(simulateStep, 1000 / 5);
+
+    // handle events
+
+    const eventsLoop = (event) => {
         const state = client.state;
         if (!state.spaceships) {
             state.spaceships = {};
@@ -124,35 +141,31 @@ window.addEventListener('load', () => {
                 }
             }
         }
-
-        // simulate world
-        for (const spaceship of Object.values(state.spaceships)) {
-            spaceship.x += spaceship.vx * delta;
-            spaceship.y += spaceship.vy * delta;
-
-            // warp
-            // if (spaceship.x < -500) {
-            //     spaceship.x += 1000;
-            // }
-            // if (spaceship.x > 500) {
-            //     spaceship.x -= 1000;
-            // }
-            // if (spaceship.y < -500) {
-            //     spaceship.y += 1000;
-            // }
-            // if (spaceship.y > 500) {
-            //     spaceship.y -= 1000;
-            // }
-        }
-
-        client.setState(state);
-        lastSimulateTime = now;
     }
-
-    simulateStep();
-    setInterval(simulateStep, 1000 / 50);
+    eventsLoop();
+    setInterval(eventsLoop, 1000 / 50);
 
     app.ticker.add(delta => {
+
+
+        // handle input -> events
+        if (controller.move.x !== 0 || controller.move.y !== 0) {
+            const acceleration = 12;
+            client.addEvent({
+                type: 'impulse',
+                rocket_id: client.clientId,
+                x: controller.move.x * acceleration * delta,
+                y: controller.move.y * acceleration * delta,
+            });
+        }
+        const { x, y } = controller.move;
+        client.addEvent({
+            type: 'set-thruster-level',
+            rocket_id: client.clientId,
+            level: Math.sqrt(x * x + y * y),
+        })
+
+
         const age = (performance.now() - lastSimulateTime) / 1000;
 
         // delete all spaceships from the game
