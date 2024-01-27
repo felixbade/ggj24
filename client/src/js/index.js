@@ -161,8 +161,8 @@ window.addEventListener('load', () => {
             // thruster
             if (spaceship.thrusterLevel > 0) {
                 const thrusterSprite = new PIXI.Sprite(thrusterTexture);
-                thrusterSprite.anchor.set(0.5, 0.5);
-                thrusterSprite.scale.set(1, 5 * spaceship.thrusterLevel);
+                thrusterSprite.anchor.set(0.5, 0.5118);
+                thrusterSprite.scale.set(1.5, 5 * spaceship.thrusterLevel);
                 thrusterSprite.y = 300;
                 sprite.addChild(thrusterSprite);
             }
