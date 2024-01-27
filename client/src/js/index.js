@@ -43,7 +43,7 @@ window.addEventListener('load', () => {
 
     client.addEventListener('welcome', (event) => {
         const { client_id } = event.detail;
-        alert(`Out ID: ${client_id}`);
+        alert(`Our ID: ${client_id}`);
     });
 
     client.addEventListener('join', (event) => {
