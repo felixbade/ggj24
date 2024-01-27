@@ -27,7 +27,7 @@ window.addEventListener('load', () => {
     }
 
     const ship = PIXI.Sprite.from('assets/images/ship-1.png');
-    ship.anchor.set(0.5, 0.65);
+    ship.anchor.set(0.5, 0.7);
     ship.scale.set(0.05);
     ship.vx = 0;
     ship.vy = 0;
