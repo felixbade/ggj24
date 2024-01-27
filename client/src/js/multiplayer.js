@@ -30,7 +30,6 @@ class MultiplayerClient extends EventTarget {
             } else if (command === 'state') {
                 this.gameStateId = data.id;
                 this.state = data.state;
-                console.log('handled events', data.handled_event_ids);
                 for (const handled_event_id of data.handled_event_ids) {
                     delete this.unhandledEvents[handled_event_id];
                 }
@@ -41,10 +40,14 @@ class MultiplayerClient extends EventTarget {
                     }
                 }));
 
+            } else if (command === 'handled-events') {
+                for (const handled_event_id of data.handled_event_ids) {
+                    delete this.unhandledEvents[handled_event_id];
+                }
+
             } else if (command === 'event') {
                 // add event to unhandled events
                 this.unhandledEvents[data.id] = data.event;
-                console.log('new event', data.event);
 
             } else if (command === 'message') {
                 this.dispatchEvent(new CustomEvent('message', { detail: data }));

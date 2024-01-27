@@ -81,25 +81,29 @@ async def handler(websocket: WebSocketServerProtocol):
                 game_state = data.get("state")
                 game_state_id = data.get("id")
                 handled_event_ids = data.get("handled_event_ids", [])
-                print(f"Client #{counter_id} sent a state: {data}")
 
                 unhandled_events = {k: v for k, v in unhandled_events.items(
                 ) if k not in handled_event_ids}
 
-                # Send the game state to all clients
+                # Send the game state to all clients except the one who sent it
                 await broadcast(json.dumps({
                     "command": "state",
                     "state": game_state,
                     "id": game_state_id,
                     "handled_event_ids": handled_event_ids
 
+                }), websocket)
+
+                # That client gets the list of handled events
+                await websocket.send(json.dumps({
+                    "command": "handled-events",
+                    "handled_event_ids": handled_event_ids
                 }))
 
             if command == "event":
                 event = data.get("event")
                 id = data.get("id")
                 unhandled_events[id] = event
-                print(f"Client #{counter_id} sent an event: {data}")
 
                 # Broadcast the event to all clients except the one who sent it
                 await broadcast(json.dumps({
