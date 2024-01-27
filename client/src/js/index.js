@@ -115,6 +115,20 @@ window.addEventListener('load', () => {
         for (const spaceship of Object.values(state.spaceships)) {
             spaceship.x += spaceship.vx * delta;
             spaceship.y += spaceship.vy * delta;
+
+            // warp
+            if (spaceship.x < -500) {
+                spaceship.x += 1000;
+            }
+            if (spaceship.x > 500) {
+                spaceship.x -= 1000;
+            }
+            if (spaceship.y < -500) {
+                spaceship.y += 1000;
+            }
+            if (spaceship.y > 500) {
+                spaceship.y -= 1000;
+            }
         }
 
         // draw state on the screen
