@@ -10,13 +10,15 @@ class MultiplayerClient extends EventTarget {
         super();
         this.state = {};
         this.gameStateId = null;
-        this.unhandledEvents = [];
+        this.unhandledEvents = {};
+        this.clientId = null;
         this.socket = new WebSocket(serverURL);
         this.socket.addEventListener('message', (event) => {
             const data = JSON.parse(event.data);
 
             const { command } = data;
             if (command === 'welcome') {
+                this.clientId = data.client_id;
                 this.dispatchEvent(new CustomEvent('welcome', { detail: data }));
 
             } else if (command === 'join') {
@@ -28,6 +30,7 @@ class MultiplayerClient extends EventTarget {
             } else if (command === 'state') {
                 this.gameStateId = data.id;
                 this.state = data.state;
+                console.log('handled events', data.handled_event_ids);
                 for (const handled_event_id of data.handled_event_ids) {
                     delete this.unhandledEvents[handled_event_id];
                 }
@@ -70,6 +73,8 @@ class MultiplayerClient extends EventTarget {
 
     addEvent(event) {
         const id = getRandomId();
+        // todo
+        // event.time = new Date();
         this.unhandledEvents[id] = event;
         this.send({
             command: 'event',

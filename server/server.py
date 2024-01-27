@@ -93,7 +93,7 @@ async def handler(websocket: WebSocketServerProtocol):
                     "id": game_state_id,
                     "handled_event_ids": handled_event_ids
 
-                }), websocket)
+                }))
 
             if command == "event":
                 event = data.get("event")
@@ -131,7 +131,7 @@ async def handler(websocket: WebSocketServerProtocol):
         }), websocket)
 
 
-async def broadcast(message, sender_websocket):
+async def broadcast(message, sender_websocket=None):
     # Send the message to all connected clients except the sender
     for counter_id, client in connected_clients.items():
         if client != sender_websocket:
