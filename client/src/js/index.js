@@ -1,3 +1,4 @@
+import { cameraFollow } from './cameraFollow.js'
 import { app, container } from './render.js'
 import MultiplayerClient from './multiplayer.js';
 const { controller, InputType } = UniversalGameController;
@@ -146,7 +147,7 @@ window.addEventListener('load', () => {
         }
 
         // draw state on the screen
-        for (const spaceship of Object.values(state.spaceships)) {
+        for (const [rocketId, spaceship] of Object.entries(state.spaceships)) {
             const sprite = new PIXI.Sprite(shipTexture);
             sprite.anchor.set(0.5, 0.7);
             sprite.scale.set(0.05);
@@ -166,7 +167,15 @@ window.addEventListener('load', () => {
                 thrusterSprite.y = 300;
                 sprite.addChild(thrusterSprite);
             }
+
+            // camera follow's player
+            // one of them is a string, the other is a number, thus '==' instead of '==='
+            if (client.clientId == rocketId) {
+                cameraFollow(sprite);
+            }
         }
+
+        console.log('client id', client.clientId)
 
         // rotate according to acceleration
         // if (controller.move.x !== 0 || controller.move.y !== 0) {
