@@ -55,6 +55,10 @@ class MultiplayerClient extends EventTarget {
 
         this.gameStateId = newStateId;
         this.state = newState;
+
+        if (this.socket.readyState !== WebSocket.OPEN) {
+            return;
+        }
         this.send({
             command: 'state',
             based_on_id: oldStateId,
