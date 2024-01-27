@@ -66,16 +66,14 @@ window.addEventListener('load', () => {
         });
     });
 
-    app.ticker.add(delta => {
-        // delete all spaceships from the game
-        for (const sprite of spaceShipSprites) {
-            gameContainer.removeChild(sprite);
-        }
-        spaceShipSprites = [];
+    let lastSimulateTime = performance.now();
+    const simulateStep = () => {
+        const now = performance.now();
+        const delta = (now - lastSimulateTime) / 1000;
 
         // handle input -> events
         if (controller.move.x !== 0 || controller.move.y !== 0) {
-            const acceleration = 0.2;
+            const acceleration = 720;
             client.addEvent({
                 type: 'impulse',
                 rocket_id: client.clientId,
@@ -96,8 +94,6 @@ window.addEventListener('load', () => {
             state.spaceships = {};
         }
 
-        const handledEventIds = [];
-        // (key, value) of unhadledEvents
         for (const [eventId, event] of Object.entries(client.unhandledEvents)) {
             if (event.type === 'add-spaceship') {
                 state.spaceships[event.rocket_id] = {
@@ -107,24 +103,24 @@ window.addEventListener('load', () => {
                     vy: event.vy,
                     rotation: event.rotation,
                 };
-                handledEventIds.push(eventId);
+                client.handleEvent(eventId);
             }
             if (event.type === 'remove-spaceship') {
                 delete state.spaceships[event.rocket_id];
-                handledEventIds.push(eventId);
+                client.handleEvent(eventId);
             }
             if (event.type === 'impulse') {
                 const spaceship = state.spaceships[event.rocket_id];
                 spaceship.vx += event.x;
                 spaceship.vy += event.y;
                 spaceship.rotation = Math.PI / 2 + Math.atan2(event.y, event.x);
-                handledEventIds.push(eventId);
+                client.handleEvent(eventId);
             }
             if (event.type === 'set-thruster-level') {
                 if (state.spaceships[event.rocket_id]) {
                     const spaceship = state.spaceships[event.rocket_id];
                     spaceship.thrusterLevel = event.level;
-                    handledEventIds.push(eventId);
+                    client.handleEvent(eventId);
                 }
             }
         }
@@ -149,13 +145,36 @@ window.addEventListener('load', () => {
             // }
         }
 
+        client.setState(state);
+        lastSimulateTime = now;
+    }
+
+    simulateStep();
+    setInterval(simulateStep, 1000 / 50);
+
+    app.ticker.add(delta => {
+        const age = (performance.now() - lastSimulateTime) / 1000;
+
+        // delete all spaceships from the game
+        for (const sprite of spaceShipSprites) {
+            gameContainer.removeChild(sprite);
+        }
+        spaceShipSprites = [];
+
         // draw state on the screen
+        const state = client.state;
+        // if state === {} -> continue
+        if (!state.spaceships) {
+            console.log('no spaceships')
+            return;
+        }
+
         for (const [rocketId, spaceship] of Object.entries(state.spaceships)) {
             const sprite = new PIXI.Sprite(shipTexture);
             sprite.anchor.set(0.5, 0.7);
             sprite.scale.set(0.05);
-            sprite.x = spaceship.x;
-            sprite.y = spaceship.y;
+            sprite.x = spaceship.x + age * spaceship.vx;
+            sprite.y = spaceship.y + age * spaceship.vy;
             sprite.vx = spaceship.vx;
             sprite.vy = spaceship.vy;
             sprite.rotation = spaceship.rotation;
@@ -187,29 +206,6 @@ window.addEventListener('load', () => {
                 bgSprite.y = bgSprite.dy + Math.round(playerShip.y / bgSize) * bgSize;
             }
         }
-
-        console.log('client id', client.clientId)
-
-        // rotate according to acceleration
-        // if (controller.move.x !== 0 || controller.move.y !== 0) {
-        //     ship.rotation = Math.PI / 2 + Math.atan2(controller.move.y, controller.move.x);
-        // }
-
-        // if trigger is pressed, move player to the center
-        // if (controller.trigger) {
-        //     ship.x = 0;
-        //     ship.y = 0;
-        //     ship.vx = 0;
-        //     ship.vy = 0;
-        //     // client.send({
-        //     //     x: ship.x,
-        //     //     y: ship.y,
-        //     //     vx: ship.vx,
-        //     //     vy: ship.vy,
-        //     // });
-        // }
-
-        client.updateState(state, handledEventIds);
 
     });
 

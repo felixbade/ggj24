@@ -5,7 +5,7 @@ export const cameraFollow = sprite => {
     const target = sprite.getGlobalPosition();
     const canvasScaling = container.parent.scale;
 
-    const lookAhead = 25;
+    const lookAhead = 0.4;
     const vx = sprite.vx || 0;
     const vy = sprite.vy || 0;
 

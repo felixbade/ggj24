@@ -67,7 +67,7 @@ class MultiplayerClient extends EventTarget {
         });
     }
 
-    updateState(newState, handledEventIds) {
+    setState(newState) {
         const oldStateId = this.gameStateId;
         const newStateId = getRandomId();
 
@@ -82,7 +82,7 @@ class MultiplayerClient extends EventTarget {
             based_on_id: oldStateId,
             id: newStateId,
             state: newState,
-            handled_event_ids: handledEventIds,
+            handled_event_ids: Object.keys(this.locallyHandledEvents),
         });
     }
 
