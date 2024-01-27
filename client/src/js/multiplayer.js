@@ -76,6 +76,9 @@ class MultiplayerClient extends EventTarget {
         // todo
         // event.time = new Date();
         this.unhandledEvents[id] = event;
+        if (this.socket.readyState !== WebSocket.OPEN) {
+            return;
+        }
         this.send({
             command: 'event',
             id: id,

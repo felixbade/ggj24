@@ -27,6 +27,7 @@ window.addEventListener('load', () => {
     }
 
     const shipTexture = PIXI.Texture.from('assets/images/ship-1.png');
+    let thrusterTexture = PIXI.Texture.from('assets/images/exhaust-1.png');
     let spaceShipSprites = [];
 
 
@@ -78,6 +79,12 @@ window.addEventListener('load', () => {
                 y: controller.move.y * acceleration * delta,
             });
         }
+        const { x, y } = controller.move;
+        client.addEvent({
+            type: 'set-thruster-level',
+            rocket_id: client.clientId,
+            level: Math.sqrt(x * x + y * y),
+        })
 
         // handle events
         const state = client.state;
@@ -108,6 +115,13 @@ window.addEventListener('load', () => {
                 spaceship.vy += event.y;
                 spaceship.rotation = Math.PI / 2 + Math.atan2(event.y, event.x);
                 handledEventIds.push(eventId);
+            }
+            if (event.type === 'set-thruster-level') {
+                if (state.spaceships[event.rocket_id]) {
+                    const spaceship = state.spaceships[event.rocket_id];
+                    spaceship.thrusterLevel = event.level;
+                    handledEventIds.push(eventId);
+                }
             }
         }
 
@@ -143,6 +157,15 @@ window.addEventListener('load', () => {
             sprite.rotation = spaceship.rotation;
             spaceShipSprites.push(sprite);
             gameContainer.addChild(sprite);
+
+            // thruster
+            if (spaceship.thrusterLevel > 0) {
+                const thrusterSprite = new PIXI.Sprite(thrusterTexture);
+                thrusterSprite.anchor.set(0.5, 0.5);
+                thrusterSprite.scale.set(1, 5 * spaceship.thrusterLevel);
+                thrusterSprite.y = 300;
+                sprite.addChild(thrusterSprite);
+            }
         }
 
         // rotate according to acceleration
