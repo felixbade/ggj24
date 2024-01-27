@@ -34,7 +34,7 @@ window.addEventListener('load', () => {
     gameContainer.addChild(ship);
 
     client.addEventListener('state', (event) => {
-        const state = event.detail;
+        const { state, unhandledEvents } = event.detail;
 
         ship.x = state.x;
         ship.y = state.y;
@@ -44,7 +44,12 @@ window.addEventListener('load', () => {
 
     client.addEventListener('welcome', (event) => {
         const { client_id } = event.detail;
-        alert(`Our ID: ${client_id}`);
+        // alert(`Our ID: ${client_id}`);
+        const nick = prompt('Enter your nickname');
+        client.addEvent({
+            type: 'set-nick',
+            nick,
+        });
     });
 
     client.addEventListener('join', (event) => {

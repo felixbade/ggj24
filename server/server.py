@@ -16,7 +16,7 @@ counter = 0
 
 game_state = {}
 game_state_id = None
-unhandled_events = []
+unhandled_events = {}
 
 
 # Commands
@@ -27,7 +27,7 @@ unhandled_events = []
 
 
 async def handler(websocket: WebSocketServerProtocol):
-    global counter, game_state_id, game_state
+    global counter, game_state_id, game_state, unhandled_events
     # Assign a unique counter-id to the client
     counter_id = counter = counter + 1
     connected_clients[counter_id] = websocket
@@ -43,8 +43,17 @@ async def handler(websocket: WebSocketServerProtocol):
     await websocket.send(json.dumps({
         "command": "state",
         "state": game_state,
-        "id": game_state_id
+        "id": game_state_id,
+        "handled_event_ids": []
     }))
+
+    # Send all unhandled events to the client, one by one
+    for id, event in unhandled_events.items():
+        await websocket.send(json.dumps({
+            "command": "event",
+            "event": event,
+            "id": id
+        }))
 
     # Broadcast a join message to all connected clients, except the one who joined
     await broadcast(json.dumps({
@@ -71,14 +80,34 @@ async def handler(websocket: WebSocketServerProtocol):
                 # TODO: delta compression
                 game_state = data.get("state")
                 game_state_id = data.get("id")
+                handled_event_ids = data.get("handled_event_ids", [])
                 print(f"Client #{counter_id} sent a state: {data}")
+
+                unhandled_events = {k: v for k, v in unhandled_events.items(
+                ) if k not in handled_event_ids}
 
                 # Send the game state to all clients
                 await broadcast(json.dumps({
                     "command": "state",
                     "state": game_state,
-                    "id": game_state_id
+                    "id": game_state_id,
+                    "handled_event_ids": handled_event_ids
+
                 }), websocket)
+
+            if command == "event":
+                event = data.get("event")
+                id = data.get("id")
+                unhandled_events[id] = event
+                print(f"Client #{counter_id} sent an event: {data}")
+
+                # Broadcast the event to all clients except the one who sent it
+                await broadcast(json.dumps({
+                    "command": "event",
+                    "event": data,
+                    "id": id
+                }), websocket)
+                continue
 
             # print(f"Client #{counter_id} says: {message}")
             # # Broadcast the message to all clients except the one who sent it
