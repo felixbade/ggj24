@@ -103,7 +103,7 @@ window.addEventListener('load', () => {
         if (controller.trigger && !prevButtonPressed) {
             // x, y = position of the rocket + a bit forward
             // dx, dy = direction of the rocket
-            const bulletSpeed = 10;
+            const bulletSpeed = 12;
             const bulletSpawnDistance = 50;
 
             const rocket = client.state.spaceships[client.clientId];
@@ -240,7 +240,7 @@ window.addEventListener('load', () => {
         }
 
         // if there are over 200 bullets, remove random a random one
-        if (Object.keys(state.bullets).length > 200) {
+        if (Object.keys(state.bullets).length > 50) {
             const bulletIds = Object.keys(state.bullets);
             const bulletId = bulletIds[Math.floor(Math.random() * bulletIds.length)];
             client.addEvent({
