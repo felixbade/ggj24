@@ -68,6 +68,11 @@ class MultiplayerClient extends EventTarget {
     }
 
     updateState(newState, handledEventIds) {
+        // All handledEventIds get handleEvent()
+        for (const id of handledEventIds) {
+            this.handleEvent(id);
+        }
+
         const oldStateId = this.gameStateId;
         const newStateId = getRandomId();
 
