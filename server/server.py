@@ -113,33 +113,35 @@ async def handler(websocket: WebSocketServerProtocol):
                 }), websocket)
                 continue
 
-            # print(f"Client #{counter_id} says: {message}")
-            # # Broadcast the message to all clients except the one who sent it
-            # await broadcast(json.dumps({
-            #     "command": "message",
-            #     "client_id": counter_id,
-            #     "message": message
-            # }), websocket)
-
     except websockets.ConnectionClosed:
         pass
     finally:
-        # Remove the client from the connected clients when disconnected
-        connected_clients.pop(counter_id)
-        print(f"Client #{counter_id} disconnected")
+        await disconnected(counter_id, websocket)
 
-        # Broadcast a leave message to all connected clients, except the one who left
-        await broadcast(json.dumps({
-            "command": "leave",
-            "client_id": counter_id
-        }), websocket)
+
+async def disconnected(counter_id, websocket: WebSocketServerProtocol):
+    # Remove the client from the connected clients when disconnected
+    connected_clients.pop(counter_id)
+    print(f"Client #{counter_id} disconnected")
+
+    # Broadcast a leave message to all connected clients, except the one who left
+    await broadcast(json.dumps({
+        "command": "leave",
+        "client_id": counter_id
+    }), websocket)
 
 
 async def broadcast(message, sender_websocket=None):
     # Send the message to all connected clients except the sender
-    for counter_id, client in connected_clients.items():
+    clients = connected_clients.items()  # might change during iteration
+    for counter_id, client in clients:
         if client != sender_websocket:
-            await client.send(message)
+            try:
+                await client.send(message)
+            except (
+                websockets.exceptions.ConnectionClosedError, websockets.exceptions.ConnectionClosedOK
+            ):
+                await disconnected(counter_id, client)
 
 
 async def main():
