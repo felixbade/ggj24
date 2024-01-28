@@ -75,7 +75,7 @@ window.addEventListener('load', () => {
 
         // handle input -> events
         if (controller.move.x !== 0 || controller.move.y !== 0) {
-            const acceleration = 0.2;
+            const acceleration = 0.2 * 0.3;
             client.addEvent({
                 type: 'impulse',
                 rocket_id: client.clientId,
@@ -187,27 +187,6 @@ window.addEventListener('load', () => {
                 bgSprite.y = bgSprite.dy + Math.round(playerShip.y / bgSize) * bgSize;
             }
         }
-
-        console.log('client id', client.clientId)
-
-        // rotate according to acceleration
-        // if (controller.move.x !== 0 || controller.move.y !== 0) {
-        //     ship.rotation = Math.PI / 2 + Math.atan2(controller.move.y, controller.move.x);
-        // }
-
-        // if trigger is pressed, move player to the center
-        // if (controller.trigger) {
-        //     ship.x = 0;
-        //     ship.y = 0;
-        //     ship.vx = 0;
-        //     ship.vy = 0;
-        //     // client.send({
-        //     //     x: ship.x,
-        //     //     y: ship.y,
-        //     //     vx: ship.vx,
-        //     //     vy: ship.vy,
-        //     // });
-        // }
 
         client.updateState(state, handledEventIds);
 
