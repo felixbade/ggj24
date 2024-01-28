@@ -34,6 +34,8 @@ window.addEventListener('load', () => {
     let thrusterTexture = PIXI.Texture.from('assets/images/exhaust-1.png');
     let spaceShipSprites = [];
 
+    const bulletTexture = PIXI.Texture.from('assets/images/bullet-1.png');
+    let bulletSprites = [];
 
     client.addEventListener('welcome', (event) => {
         // const nick = prompt('Enter your nickname');
@@ -66,12 +68,20 @@ window.addEventListener('load', () => {
         });
     });
 
+    let prevButtonPressed = false;
+
     app.ticker.add(delta => {
         // delete all spaceships from the game
         for (const sprite of spaceShipSprites) {
             gameContainer.removeChild(sprite);
         }
         spaceShipSprites = [];
+
+        // delete all bullets from the game
+        for (const sprite of bulletSprites) {
+            gameContainer.removeChild(sprite);
+        }
+        bulletSprites = [];
 
         // handle input -> events
         if (controller.move.x !== 0 || controller.move.y !== 0) {
@@ -90,10 +100,33 @@ window.addEventListener('load', () => {
             level: Math.sqrt(x * x + y * y),
         })
 
+        if (controller.trigger && !prevButtonPressed) {
+            // x, y = position of the rocket + a bit forward
+            // dx, dy = direction of the rocket
+            const bulletSpeed = 10;
+            const bulletSpawnDistance = 30;
+
+            const rocket = client.state.spaceships[client.clientId];
+            const dx = Math.sin(rocket.rotation);
+            const dy = -Math.cos(rocket.rotation);
+            const vx = dx * bulletSpeed + rocket.vx;
+            const vy = dy * bulletSpeed + rocket.vy;
+            const x = rocket.x + dx * bulletSpawnDistance;
+            const y = rocket.y + dy * bulletSpawnDistance;
+            client.addEvent({
+                type: 'shoot',
+                x, y, vx, vy,
+            });
+        }
+        prevButtonPressed = controller.trigger;
+
         // handle events
         const state = client.state;
         if (!state.spaceships) {
             state.spaceships = {};
+        }
+        if (!state.bullets) {
+            state.bullets = {};
         }
 
         const handledEventIds = [];
@@ -127,6 +160,18 @@ window.addEventListener('load', () => {
                     handledEventIds.push(eventId);
                 }
             }
+            if (event.type === 'shoot') {
+                const bullet = {
+                    x: event.x,
+                    y: event.y,
+                    vx: event.vx,
+                    vy: event.vy,
+                    orientation: Math.PI / 2 + Math.atan2(event.vy, event.vx),
+                }
+                state.bullets = state.bullets || {};
+                state.bullets[eventId] = bullet;
+                handledEventIds.push(eventId);
+            }
         }
 
         // simulate world
@@ -147,6 +192,14 @@ window.addEventListener('load', () => {
             // if (spaceship.y > 500) {
             //     spaceship.y -= 1000;
             // }
+        }
+
+        // simulate bullets
+        for (const [bulletId, bullet] of Object.entries(state.bullets)) {
+            bullet.x += bullet.vx * delta;
+            bullet.y += bullet.vy * delta;
+            // bullet.vx *= 0.99;
+            // bullet.vy *= 0.99;
         }
 
         // draw state on the screen
@@ -176,6 +229,18 @@ window.addEventListener('load', () => {
             if (client.clientId == rocketId) {
                 cameraFollow(sprite);
             }
+        }
+
+        // draw bullets
+        for (const [bulletId, bullet] of Object.entries(state.bullets)) {
+            const sprite = new PIXI.Sprite(bulletTexture);
+            sprite.anchor.set(0.5, 0.5);
+            sprite.scale.set(0.05);
+            sprite.x = bullet.x;
+            sprite.y = bullet.y;
+            sprite.rotation = bullet.orientation;
+            bulletSprites.push(sprite);
+            gameContainer.addChild(sprite);
         }
 
         const playerShip = state.spaceships[client.clientId];
