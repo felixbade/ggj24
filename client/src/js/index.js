@@ -104,7 +104,7 @@ window.addEventListener('load', () => {
             // x, y = position of the rocket + a bit forward
             // dx, dy = direction of the rocket
             const bulletSpeed = 10;
-            const bulletSpawnDistance = 30;
+            const bulletSpawnDistance = 50;
 
             const rocket = client.state.spaceships[client.clientId];
             if (rocket) {
@@ -237,6 +237,16 @@ window.addEventListener('load', () => {
             if (bullet.y > 5000) {
                 bullet.y -= 10000;
             }
+        }
+
+        // if there are over 200 bullets, remove random a random one
+        if (Object.keys(state.bullets).length > 200) {
+            const bulletIds = Object.keys(state.bullets);
+            const bulletId = bulletIds[Math.floor(Math.random() * bulletIds.length)];
+            client.addEvent({
+                type: 'remove-bullet',
+                bullet_id: bulletId,
+            });
         }
 
         // if bullets hits player, their rocket is removed
