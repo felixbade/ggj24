@@ -5,13 +5,25 @@ export const cameraFollow = sprite => {
     const target = sprite.getGlobalPosition();
     const canvasScaling = container.parent.scale;
 
-    const lookAhead = 25;
+    const r = a => Math.sqrt(a.x * a.x + a.y * a.y);
+
+    const speedCompensation = 13;
+    const lookAhead = 10;
+    const lookAheadMax = 30;
     const vx = sprite.vx || 0;
     const vy = sprite.vy || 0;
+    const vr = r({ x: vx, y: vy });
+    let vxClamped = vx;
+    let vyClamped = vy;
+    if (vr > lookAheadMax) {
+        const t = lookAheadMax / vr;
+        vxClamped *= t;
+        vyClamped *= t;
+    }
 
     const newCentering = {
-        x: (view.x - target.x) / canvasScaling.x - vx * lookAhead,
-        y: (view.y - target.y) / canvasScaling.y - vy * lookAhead,
+        x: (view.x - target.x) / canvasScaling.x - vxClamped * lookAhead - vx * speedCompensation,
+        y: (view.y - target.y) / canvasScaling.y - vyClamped * lookAhead - vy * speedCompensation,
     };
 
     const diff = {
@@ -19,7 +31,22 @@ export const cameraFollow = sprite => {
         y: newCentering.y - container.y,
     };
 
-    const r = a => Math.sqrt(a.x * a.x + a.y * a.y);
+    if (diff.x > 5000) {
+        diff.x -= 10000;
+        container.x += 10000;
+    }
+    if (diff.x < -5000) {
+        diff.x += 10000;
+        container.x -= 10000;
+    }
+    if (diff.y > 5000) {
+        diff.y -= 10000;
+        container.y += 10000;
+    }
+    if (diff.y < -5000) {
+        diff.y += 10000;
+        container.y -= 10000;
+    }
 
     // Exponential smoothing
     const t = mapClamp(1 / (Math.sqrt(r(diff)) * 1.2 + 1), 1, 0.1, 0.5, 0.07);
