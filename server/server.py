@@ -121,7 +121,12 @@ async def handler(websocket: WebSocketServerProtocol):
 
 async def disconnected(counter_id, websocket: WebSocketServerProtocol):
     # Remove the client from the connected clients when disconnected
-    connected_clients.pop(counter_id)
+    try:
+        connected_clients.pop(counter_id)
+    except KeyError:
+        # sometimes the client gets multiple messages that all fail and each tries to disconnect
+        return
+
     print(f"Client #{counter_id} disconnected")
 
     # Broadcast a leave message to all connected clients, except the one who left
