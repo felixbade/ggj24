@@ -107,21 +107,34 @@ window.addEventListener('load', () => {
             const bulletSpawnDistance = 30;
 
             const rocket = client.state.spaceships[client.clientId];
-            const dx = Math.sin(rocket.rotation);
-            const dy = -Math.cos(rocket.rotation);
-            const vx = dx * bulletSpeed + rocket.vx;
-            const vy = dy * bulletSpeed + rocket.vy;
-            const x = rocket.x + dx * bulletSpawnDistance;
-            const y = rocket.y + dy * bulletSpawnDistance;
-            client.addEvent({
-                type: 'shoot',
-                x, y, vx, vy,
-            });
+            if (rocket) {
+                const dx = Math.sin(rocket.rotation);
+                const dy = -Math.cos(rocket.rotation);
+                const vx = dx * bulletSpeed + rocket.vx;
+                const vy = dy * bulletSpeed + rocket.vy;
+                const x = rocket.x + dx * bulletSpawnDistance;
+                const y = rocket.y + dy * bulletSpawnDistance;
+                client.addEvent({
+                    type: 'shoot',
+                    x, y, vx, vy,
+                });
+            } else {
+                // ????
+                client.addEvent({
+                    'add-spaceship': client.clientId,
+                    x: 0,
+                    y: 0,
+                    vx: 0,
+                    vy: 0,
+                    rotation: 0,
+                });
+            }
         }
         prevButtonPressed = controller.trigger;
 
         // handle events
-        const state = client.state;
+        // deep copy
+        const state = JSON.parse(JSON.stringify(client.state));
         if (!state.spaceships) {
             state.spaceships = {};
         }
@@ -183,18 +196,18 @@ window.addEventListener('load', () => {
             spaceship.y += spaceship.vy * delta;
 
             // warp
-            // if (spaceship.x < -500) {
-            //     spaceship.x += 1000;
-            // }
-            // if (spaceship.x > 500) {
-            //     spaceship.x -= 1000;
-            // }
-            // if (spaceship.y < -500) {
-            //     spaceship.y += 1000;
-            // }
-            // if (spaceship.y > 500) {
-            //     spaceship.y -= 1000;
-            // }
+            if (spaceship.x < -5000) {
+                spaceship.x += 10000;
+            }
+            if (spaceship.x > 5000) {
+                spaceship.x -= 10000;
+            }
+            if (spaceship.y < -5000) {
+                spaceship.y += 10000;
+            }
+            if (spaceship.y > 5000) {
+                spaceship.y -= 10000;
+            }
         }
 
         // simulate bullets
@@ -203,6 +216,18 @@ window.addEventListener('load', () => {
             bullet.y += bullet.vy * delta;
             // bullet.vx *= 0.99;
             // bullet.vy *= 0.99;
+            if (bullet.x < -5000) {
+                bullet.x += 10000;
+            }
+            if (bullet.x > 5000) {
+                bullet.x -= 10000;
+            }
+            if (bullet.y < -5000) {
+                bullet.y += 10000;
+            }
+            if (bullet.y > 5000) {
+                bullet.y -= 10000;
+            }
         }
 
         // draw state on the screen
