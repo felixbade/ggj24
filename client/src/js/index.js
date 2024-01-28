@@ -85,7 +85,7 @@ window.addEventListener('load', () => {
 
         // handle input -> events
         if (controller.move.x !== 0 || controller.move.y !== 0) {
-            const acceleration = 0.2 * 0.3;
+            const acceleration = 0.2;
             client.addEvent({
                 type: 'impulse',
                 rocket_id: client.clientId,
@@ -148,9 +148,12 @@ window.addEventListener('load', () => {
             }
             if (event.type === 'impulse') {
                 const spaceship = state.spaceships[event.rocket_id];
-                spaceship.vx += event.x;
-                spaceship.vy += event.y;
-                spaceship.rotation = Math.PI / 2 + Math.atan2(event.y, event.x);
+                if (spaceship) {
+                    // might have been removed due to disconnect
+                    spaceship.vx += event.x;
+                    spaceship.vy += event.y;
+                    spaceship.rotation = Math.PI / 2 + Math.atan2(event.y, event.x);
+                }
                 handledEventIds.push(eventId);
             }
             if (event.type === 'set-thruster-level') {
