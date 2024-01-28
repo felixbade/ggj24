@@ -121,7 +121,8 @@ window.addEventListener('load', () => {
             } else {
                 // ????
                 client.addEvent({
-                    'add-spaceship': client.clientId,
+                    type: 'add-spaceship',
+                    rocket_id: client.clientId,
                     x: 0,
                     y: 0,
                     vx: 0,
@@ -146,6 +147,7 @@ window.addEventListener('load', () => {
         // (key, value) of unhadledEvents
         for (const [eventId, event] of Object.entries(client.unhandledEvents)) {
             if (event.type === 'add-spaceship') {
+                console.log('added spaceship', event.rocket_id)
                 state.spaceships[event.rocket_id] = {
                     x: event.x,
                     y: event.y,
@@ -155,11 +157,11 @@ window.addEventListener('load', () => {
                 };
                 handledEventIds.push(eventId);
             }
-            if (event.type === 'remove-spaceship') {
+            else if (event.type === 'remove-spaceship') {
                 delete state.spaceships[event.rocket_id];
                 handledEventIds.push(eventId);
             }
-            if (event.type === 'impulse') {
+            else if (event.type === 'impulse') {
                 const spaceship = state.spaceships[event.rocket_id];
                 if (spaceship) {
                     // might have been removed due to disconnect
@@ -169,14 +171,14 @@ window.addEventListener('load', () => {
                 }
                 handledEventIds.push(eventId);
             }
-            if (event.type === 'set-thruster-level') {
+            else if (event.type === 'set-thruster-level') {
                 if (state.spaceships[event.rocket_id]) {
                     const spaceship = state.spaceships[event.rocket_id];
                     spaceship.thrusterLevel = event.level;
                     handledEventIds.push(eventId);
                 }
             }
-            if (event.type === 'shoot') {
+            else if (event.type === 'shoot') {
                 const bullet = {
                     x: event.x,
                     y: event.y,
@@ -187,6 +189,13 @@ window.addEventListener('load', () => {
                 state.bullets = state.bullets || {};
                 state.bullets[eventId] = bullet;
                 handledEventIds.push(eventId);
+            }
+            else if (event.type === 'remove-bullet') {
+                delete state.bullets[event.bullet_id];
+                handledEventIds.push(eventId);
+            }
+            else {
+                console.error('unknown event', event);
             }
         }
 
@@ -230,6 +239,33 @@ window.addEventListener('load', () => {
             }
         }
 
+        // if bullets hits player, their rocket is removed
+        for (const [rocketId, spaceship] of Object.entries(state.spaceships)) {
+            for (const [bulletId, bullet] of Object.entries(state.bullets)) {
+                if (rocketId == bulletId) {
+                    continue;
+                }
+                // spawn area is safe
+                // if (spaceship.x * spaceship.x + spaceship.y * spaceship.y < 10000) {
+                //     continue;
+                // }
+
+                const dx = spaceship.x - bullet.x;
+                const dy = spaceship.y - bullet.y;
+                const r = Math.sqrt(dx * dx + dy * dy);
+                if (r < 30) {
+                    client.addEvent({
+                        type: 'remove-spaceship',
+                        rocket_id: rocketId,
+                    });
+                    client.addEvent({
+                        type: 'remove-bullet',
+                        bullet_id: bulletId,
+                    })
+                }
+            }
+        }
+
         // draw state on the screen
         for (const [rocketId, spaceship] of Object.entries(state.spaceships)) {
             const sprite = new PIXI.Sprite(shipTexture);
@@ -263,7 +299,7 @@ window.addEventListener('load', () => {
         for (const [bulletId, bullet] of Object.entries(state.bullets)) {
             const sprite = new PIXI.Sprite(bulletTexture);
             sprite.anchor.set(0.5, 0.5);
-            sprite.scale.set(0.05);
+            sprite.scale.set(0.1);
             sprite.x = bullet.x;
             sprite.y = bullet.y;
             sprite.rotation = bullet.orientation;
