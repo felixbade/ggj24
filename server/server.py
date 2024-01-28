@@ -138,7 +138,8 @@ async def disconnected(counter_id, websocket: WebSocketServerProtocol):
 
 async def broadcast(message, sender_websocket=None):
     # Send the message to all connected clients except the sender
-    clients = connected_clients.items()  # might change during iteration
+    # might change during iteration
+    clients = [x for x in connected_clients.items()]
     for counter_id, client in clients:
         if client != sender_websocket:
             try:
