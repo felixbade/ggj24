@@ -72,6 +72,7 @@ class MultiplayerClient extends EventTarget {
         for (const id of handledEventIds) {
             this.handleEvent(id);
         }
+        console.log('unhandledEvents', Object.keys(this.unhandledEvents).length);
 
         const oldStateId = this.gameStateId;
         const newStateId = getRandomId();
