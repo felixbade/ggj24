@@ -108,7 +108,7 @@ async def handler(websocket: WebSocketServerProtocol):
                 # Broadcast the event to all clients except the one who sent it
                 await broadcast(json.dumps({
                     "command": "event",
-                    "event": data,
+                    "event": event,
                     "id": id
                 }), websocket)
                 continue
