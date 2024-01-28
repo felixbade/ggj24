@@ -33,35 +33,36 @@ async def handler(websocket: WebSocketServerProtocol):
     connected_clients[counter_id] = websocket
     print(f"Client #{counter_id} connected")
 
-    # Reply a welcome message to the client
-    await websocket.send(json.dumps({
-        "command": "welcome",
-        "client_id": counter_id
-    }))
+    try:
 
-    # Send the current game state to the client
-    await websocket.send(json.dumps({
-        "command": "state",
-        "state": game_state,
-        "id": game_state_id,
-        "handled_event_ids": []
-    }))
-
-    # Send all unhandled events to the client, one by one
-    for id, event in unhandled_events.items():
+        # Reply a welcome message to the client
         await websocket.send(json.dumps({
-            "command": "event",
-            "event": event,
-            "id": id
+            "command": "welcome",
+            "client_id": counter_id
         }))
 
-    # Broadcast a join message to all connected clients, except the one who joined
-    await broadcast(json.dumps({
-        "command": "join",
-        "client_id": counter_id
-    }), websocket)
+        # Send the current game state to the client
+        await websocket.send(json.dumps({
+            "command": "state",
+            "state": game_state,
+            "id": game_state_id,
+            "handled_event_ids": []
+        }))
 
-    try:
+        # Send all unhandled events to the client, one by one
+        for id, event in unhandled_events.items():
+            await websocket.send(json.dumps({
+                "command": "event",
+                "event": event,
+                "id": id
+            }))
+
+        # Broadcast a join message to all connected clients, except the one who joined
+        await broadcast(json.dumps({
+            "command": "join",
+            "client_id": counter_id
+        }), websocket)
+
         async for message in websocket:
             data = json.loads(message)
             command = data.get("command")
