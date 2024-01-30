@@ -108,6 +108,7 @@ window.addEventListener('load', () => {
             const bulletSpawnDistance = 50;
 
             const rocket = client.state.spaceships[client.clientId];
+            // someone might have shot us down
             if (rocket) {
                 const dx = Math.sin(rocket.rotation);
                 const dy = -Math.cos(rocket.rotation);
@@ -160,6 +161,17 @@ window.addEventListener('load', () => {
             }
             else if (event.type === 'remove-spaceship') {
                 delete state.spaceships[event.rocket_id];
+                handledEventIds.push(eventId);
+            }
+            else if (event.type === 'destroy-spaceship') {
+                // reset spaceship position with random small velocity
+                const spaceship = state.spaceships[event.rocket_id];
+                spaceship.x = 0;
+                spaceship.y = 0;
+                spaceship.vx = Math.random() * 2 - 1;
+                spaceship.vy = Math.random() * 2 - 1;
+                spaceship.rotation = Math.random() * Math.PI * 2;
+
                 handledEventIds.push(eventId);
             }
             else if (event.type === 'impulse') {
@@ -266,7 +278,7 @@ window.addEventListener('load', () => {
                 const r = Math.sqrt(dx * dx + dy * dy);
                 if (r < 30) {
                     client.addEvent({
-                        type: 'remove-spaceship',
+                        type: 'destroy-spaceship',
                         rocket_id: rocketId,
                     });
                     client.addEvent({
