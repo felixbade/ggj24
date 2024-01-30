@@ -1,7 +1,7 @@
 import os
 import asyncio
 import json
-import random
+import time
 import websockets
 from dotenv import load_dotenv
 from websockets import WebSocketServerProtocol
@@ -26,12 +26,17 @@ unhandled_events = {}
 # 4. leave: Sent to all other clients when a client leaves
 
 
+def log(message):
+    # print [YYYY-MM-DD HH:MM:SS] message
+    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {message}")
+
+
 async def handler(websocket: WebSocketServerProtocol):
     global counter, game_state_id, game_state, unhandled_events
     # Assign a unique counter-id to the client
     counter_id = counter = counter + 1
     connected_clients[counter_id] = websocket
-    print(f"Client #{counter_id} connected")
+    log(f"Client #{counter_id} connected ({len(connected_clients)} now)")
 
     try:
 
@@ -127,7 +132,7 @@ async def disconnected(counter_id, websocket: WebSocketServerProtocol):
         # sometimes the client gets multiple messages that all fail and each tries to disconnect
         return
 
-    print(f"Client #{counter_id} disconnected")
+    log(f"Client #{counter_id} disconnected ({len(connected_clients)} now)")
 
     # Broadcast a leave message to all connected clients, except the one who left
     await broadcast(json.dumps({
