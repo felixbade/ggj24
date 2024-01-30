@@ -1,3 +1,4 @@
+import { arenaSize } from './constants.js';
 import { container } from './render.js'
 
 export const cameraFollow = sprite => {
@@ -31,21 +32,21 @@ export const cameraFollow = sprite => {
         y: newCentering.y - container.y,
     };
 
-    if (diff.x > 5000) {
-        diff.x -= 10000;
-        container.x += 10000;
+    if (diff.x > arenaSize / 2) {
+        diff.x -= arenaSize;
+        container.x += arenaSize;
     }
-    if (diff.x < -5000) {
-        diff.x += 10000;
-        container.x -= 10000;
+    if (diff.x < -arenaSize / 2) {
+        diff.x += arenaSize;
+        container.x -= arenaSize;
     }
-    if (diff.y > 5000) {
-        diff.y -= 10000;
-        container.y += 10000;
+    if (diff.y > arenaSize / 2) {
+        diff.y -= arenaSize;
+        container.y += arenaSize;
     }
-    if (diff.y < -5000) {
-        diff.y += 10000;
-        container.y -= 10000;
+    if (diff.y < -arenaSize / 2) {
+        diff.y += arenaSize;
+        container.y -= arenaSize;
     }
 
     // Exponential smoothing

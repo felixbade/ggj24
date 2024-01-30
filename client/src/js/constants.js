@@ -1,0 +1,1 @@
+export const arenaSize = 4000;

@@ -1,3 +1,4 @@
+import { arenaSize } from './constants.js';
 import { cameraFollow } from './cameraFollow.js'
 import { app, container } from './render.js'
 import MultiplayerClient from './multiplayer.js';
@@ -205,17 +206,17 @@ window.addEventListener('load', () => {
             spaceship.y += spaceship.vy * delta;
 
             // warp
-            if (spaceship.x < -5000) {
-                spaceship.x += 10000;
+            if (spaceship.x < -arenaSize / 2) {
+                spaceship.x += arenaSize;
             }
-            if (spaceship.x > 5000) {
-                spaceship.x -= 10000;
+            if (spaceship.x > arenaSize / 2) {
+                spaceship.x -= arenaSize;
             }
-            if (spaceship.y < -5000) {
-                spaceship.y += 10000;
+            if (spaceship.y < -arenaSize / 2) {
+                spaceship.y += arenaSize;
             }
-            if (spaceship.y > 5000) {
-                spaceship.y -= 10000;
+            if (spaceship.y > arenaSize / 2) {
+                spaceship.y -= arenaSize;
             }
         }
 
@@ -225,17 +226,17 @@ window.addEventListener('load', () => {
             bullet.y += bullet.vy * delta;
             // bullet.vx *= 0.99;
             // bullet.vy *= 0.99;
-            if (bullet.x < -5000) {
-                bullet.x += 10000;
+            if (bullet.x < -arenaSize / 2) {
+                bullet.x += arenaSize;
             }
-            if (bullet.x > 5000) {
-                bullet.x -= 10000;
+            if (bullet.x > arenaSize / 2) {
+                bullet.x -= arenaSize;
             }
-            if (bullet.y < -5000) {
-                bullet.y += 10000;
+            if (bullet.y < -arenaSize / 2) {
+                bullet.y += arenaSize;
             }
-            if (bullet.y > 5000) {
-                bullet.y -= 10000;
+            if (bullet.y > arenaSize / 2) {
+                bullet.y -= arenaSize;
             }
         }
 
@@ -256,7 +257,7 @@ window.addEventListener('load', () => {
                     continue;
                 }
                 // spawn area is safe
-                // if (spaceship.x * spaceship.x + spaceship.y * spaceship.y < 10000) {
+                // if (spaceship.x * spaceship.x + spaceship.y * spaceship.y < arenaSize) {
                 //     continue;
                 // }
 
