@@ -166,11 +166,13 @@ window.addEventListener('load', () => {
             else if (event.type === 'destroy-spaceship') {
                 // reset spaceship position with random small velocity
                 const spaceship = state.spaceships[event.rocket_id];
-                spaceship.x = 0;
-                spaceship.y = 0;
-                spaceship.vx = Math.random() * 2 - 1;
-                spaceship.vy = Math.random() * 2 - 1;
-                spaceship.rotation = Math.random() * Math.PI * 2;
+                if (spaceship) {
+                    spaceship.x = 0;
+                    spaceship.y = 0;
+                    spaceship.vx = Math.random() * 2 - 1;
+                    spaceship.vy = Math.random() * 2 - 1;
+                    spaceship.rotation = Math.random() * Math.PI * 2;
+                }
 
                 handledEventIds.push(eventId);
             }
