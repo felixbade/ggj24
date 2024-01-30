@@ -144,9 +144,7 @@ async def broadcast(message, sender_websocket=None):
         if client != sender_websocket:
             try:
                 await client.send(message)
-            except (
-                websockets.exceptions.ConnectionClosedError, websockets.exceptions.ConnectionClosedOK
-            ):
+            except websockets.exceptions.WebSocketException:
                 await disconnected(counter_id, client)
 
 
